@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    kpeg (1.1.0)
+    parslet (1.8.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  kpeg
+  parslet
+
+BUNDLED WITH
+   2.0.1
