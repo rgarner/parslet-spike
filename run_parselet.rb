@@ -27,7 +27,8 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:field_block)            { lbrace >> field_defs >> rbrace }
   rule(:field_defs)             { field_def.repeat(1) }
   rule(:field_def)              { pascal_case_identifier.as(:field) >> field_source >> space? }
-  rule(:field_source)           { space? >> str('from') >> space? >> string.as(:from) }
+  rule(:field_source)           { space? >> str('from') >> space? >> string.as(:from) >> space? >> optional.as(:optional).maybe }
+  rule(:optional)               { str('optional') }
 
   rule(:string) {
     str("'") >> (
@@ -57,13 +58,14 @@ doc = <<~EOF
     ManagementChargeRate 1.5%
 
     InvoiceFields {
-      TotalValue from 'Total Spend'
+      TotalValue  from 'Total Spend'
 
       CustomerURN from 'Customer URN'
-      LotNumber from 'Lot Number'
-
+      LotNumber   from 'Tier Number'
       ServiceType from 'Service Type'
-      SubType from 'Sub Type'
+      SubType     from 'Sub Type'
+
+      UnitPrice from 'Price per Unit' optional
     }
   }
 EOF
