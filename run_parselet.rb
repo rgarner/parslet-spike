@@ -14,22 +14,20 @@ class FrameworkDefinitionParser < Parslet::Parser
   end
 
   rule(:framework_identifier)   { match(/[A-Z0-9\/]/).repeat(1) }
-  rule(:snake_case_identifier)  { match(/[a-z0-9_]/).repeat(1) }
-  rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat }
+  rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1) }
 
   rule(:metadata)               { name >> management_charge }
-  rule(:name)                   { str('name') >> space? >> string.as(:name) >> space? }
+  rule(:name)                   { str('Name') >> space? >> string.as(:name) >> space? }
   rule(:management_charge) do
-    str('management_charge_rate') >> space? >> (percentage | str('custom')).as(:management_charge_rate) >> space?
+    str('ManagementChargeRate') >> space? >> (percentage | str('custom')).as(:management_charge_rate) >> space?
   end
-  rule(:percentage)             { integer.as(:percentage) >> str('%') >> space? }
+  rule(:percentage)             { float.as(:percentage) >> str('%') >> space? }
 
-  rule(:invoice_fields)         { str('Invoice') >> space? >> field_block }
-  rule(:field_block)            { lbrace >> total_value_field >> field_defs.maybe >> rbrace >> space? }
-  rule(:total_value_field)      { str('total_value_field') >> space? >> string.as(:total_value_field) >> space? }
-  rule(:field_defs)             { field_def.repeat }
-  rule(:field_def)              { str('field') >> space? >> pascal_case_identifier.as(:field) >> field_options.maybe >> space? }
-  rule(:field_options)          { str(',') >> space? >> str('from:') >> space? >> string.as(:from) }
+  rule(:invoice_fields)         { str('InvoiceFields') >> space? >> field_block >> space? }
+  rule(:field_block)            { lbrace >> field_defs>> rbrace }
+  rule(:field_defs)             { field_def.repeat(1) }
+  rule(:field_def)              { pascal_case_identifier.as(:field) >> field_source >> space? }
+  rule(:field_source)           { space? >> str('from') >> space? >> string.as(:from) }
 
   rule(:string) {
     str("'") >> (
@@ -38,6 +36,7 @@ class FrameworkDefinitionParser < Parslet::Parser
   }
 
   rule(:integer) { match(/[0-9]/).repeat }
+  rule(:float)   { integer >> (str('.') >> match('[0-9]').repeat(1)).as(:float) >> space? }
 
   rule(:space)  { match('\s').repeat(1) }
   rule(:space?) { space.maybe }
@@ -46,16 +45,25 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:rbrace) { str('}') >> space? }
 end
 
+# InvoiceFields specified in PascalCase.
+# Each field is a known destination with a known type, so type annotations are
+# not necessary.
+# Custom validators and coercions to deal with data quality issues will be
+# applied automatically.
+# Where fields are of unknown type, String is assumed.
 doc = <<~EOF
   Framework CM/OSG/05/3565 {
-    name 'My framework name'
-    management_charge_rate 1%
+    Name                 'Laundry Services - Wave 2'
+    ManagementChargeRate 1.5%
 
-    Invoice {
-      total_value_field 'Total Cost or Something'
+    InvoiceFields {
+      TotalValue from 'Total Spend'
 
-      field FrankZappa
-      field SarahConnor, from: 'The Terminator'
+      CustomerURN from 'Customer URN'
+      LotNumber from 'Lot Number'
+
+      ServiceType from 'Service Type'
+      SubType from 'Sub Type'
     }
   }
 EOF
@@ -71,10 +79,10 @@ end
 
 puts '*******'
 
-class SomeTransform < Parslet::Transform
-  rule(:string => simple(:s))      { String(s) }
-  rule(:percentage => simple(:i) ) { BigDecimal(i) }
+class SimplifyHashTransform < Parslet::Transform
+  rule(string: simple(:s))                 { String(s) }
+  rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
 end
 
-t = SomeTransform.new
+t = SimplifyHashTransform.new
 pp t.apply(slice)
