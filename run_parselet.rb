@@ -13,7 +13,7 @@ class FrameworkDefinitionParser < Parslet::Parser
     lbrace >> metadata >> space? >> invoice_fields.maybe.as(:invoice_fields) >> rbrace
   end
 
-  rule(:framework_identifier)   { match(/[A-Z0-9\/]/).repeat(1) }
+  rule(:framework_identifier)   { match(%r{[A-Z0-9/]}).repeat(1) }
   rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1) }
 
   rule(:metadata)               { name >> management_charge }
@@ -24,7 +24,7 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:percentage)             { float.as(:percentage) >> str('%') >> space? }
 
   rule(:invoice_fields)         { str('InvoiceFields') >> space? >> field_block >> space? }
-  rule(:field_block)            { lbrace >> field_defs>> rbrace }
+  rule(:field_block)            { lbrace >> field_defs >> rbrace }
   rule(:field_defs)             { field_def.repeat(1) }
   rule(:field_def)              { pascal_case_identifier.as(:field) >> field_source >> space? }
   rule(:field_source)           { space? >> str('from') >> space? >> string.as(:from) }
