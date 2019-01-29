@@ -18,9 +18,7 @@ class FrameworkDefinitionParser < Parslet::Parser
 
   rule(:metadata)               { name >> management_charge }
   rule(:name)                   { str('Name') >> space? >> string.as(:name) >> space? }
-  rule(:management_charge) do
-    str('ManagementChargeRate') >> space? >> (percentage | str('custom')).as(:management_charge_rate) >> space?
-  end
+  rule(:management_charge)      { str('ManagementChargeRate') >> space? >> percentage).as(:management_charge_rate) >> space? }
   rule(:percentage)             { float.as(:percentage) >> str('%') >> space? }
 
   rule(:invoice_fields)         { str('InvoiceFields') >> space? >> field_block >> space? }
