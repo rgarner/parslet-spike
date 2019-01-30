@@ -12,7 +12,7 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:framework_block) do
     braced(
       spaced(metadata) >>
-      spaced(invoice_fields.maybe.as(:invoice_fields))
+      spaced(fields_blocks.maybe.as(:entry_data))
     )
   end
 
@@ -24,7 +24,9 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:management_charge)      { (str('ManagementChargeRate') >> spaced(percentage)).as(:management_charge_rate) }
   rule(:percentage)             { float.as(:percentage) >> str('%') }
 
-  rule(:invoice_fields)         { str('InvoiceFields') >> spaced(field_block) }
+  rule(:fields_blocks)          { (invoice_fields >> contract_fields.maybe) | (contract_fields >> invoice_fields.maybe) }
+  rule(:invoice_fields)         { (str('InvoiceFields') >> spaced(field_block)).as(:invoice_fields) }
+  rule(:contract_fields)        { (str('ContractFields') >> spaced(field_block)).as(:contract_fields) }
   rule(:field_block)            { braced(field_defs) }
   rule(:field_defs)             { field_def.repeat(1) }
   rule(:field_def)              { pascal_case_identifier.as(:field) >> spaced(typedef.maybe.as(:type) >> field_source) }
@@ -66,6 +68,10 @@ doc = <<~EOF
   Framework CM/OSG/05/3565 {
     Name                 'Laundry Services - Wave 2'
     ManagementChargeRate 1.5%
+
+    ContractFields {
+      TotalValue from 'Total Spend'
+    }
 
     InvoiceFields {
       TotalValue  from 'Total Spend'
