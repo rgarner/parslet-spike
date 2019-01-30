@@ -2,6 +2,14 @@ require 'parslet'
 require 'bigdecimal'
 
 class FrameworkDefinitionParser < Parslet::Parser
+  module Type
+    INTEGER = 'Integer'.freeze
+    STRING  = 'String'.freeze
+    DECIMAL = 'Decimal'.freeze
+    DATE    = 'Date'.freeze
+    BOOLEAN = 'Boolean'.freeze
+  end
+
   root(:framework)
   rule(:framework) do
     str('Framework') >>
@@ -29,9 +37,12 @@ class FrameworkDefinitionParser < Parslet::Parser
   rule(:contract_fields)        { (str('ContractFields') >> spaced(field_block)).as(:contract_fields) }
   rule(:field_block)            { braced(field_defs) }
   rule(:field_defs)             { field_def.repeat(1) }
-  rule(:field_def)              { pascal_case_identifier.as(:field) >> spaced(typedef.maybe.as(:type) >> field_source) }
-  rule(:field_source)           { spaced(str('from')) >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
-  rule(:typedef)                { str('Integer') | str('String') | str('Decimal') | str('Date') | str('Boolean') }
+  rule(:field_def)              { known_field | additional_field | unknown_field }
+  rule(:known_field)            { pascal_case_identifier.as(:field) >> field_source }
+  rule(:additional_field)       { spaced(typedef).as(:type) >> (str('Additional') >> match(/[1-8]/)).as(:field) >> field_source }
+  rule(:unknown_field)          { spaced(typedef).as(:type) >> field_source }
+  rule(:field_source)           { spaced(str('from')).maybe >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
+  rule(:typedef)                { str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN) }
   rule(:optional)               { str('optional') }
 
   rule(:string) {
@@ -81,7 +92,11 @@ doc = <<~EOF
       ServiceType from 'Service Type'
       SubType     from 'Sub Type'
 
-      UnitPrice Decimal from 'Price per Unit' optional
+      Decimal Additional8 from 'Somewhere'
+
+      Decimal 'Price per Unit' optional
+
+      Decimal 'Invoice Line Product / Service Grouping'
     }
   }
 EOF
@@ -98,6 +113,13 @@ end
 puts '*******'
 
 class SimplifyHashTransform < Parslet::Transform
+  # Fields without a type are always treated as a String
+  rule(field: simple(:name), from: simple(:from)) do |dict|
+    dict[:type] = 'String'
+    dict
+  end
+
+  # Type casts from strings
   rule(string: simple(:s))                 { String(s) }
   rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
 end
