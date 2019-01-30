@@ -51,6 +51,10 @@ describe Framework::Definition::Compiler do
       expect(invoices_class.model_name).to eql('Invoice')
     end
 
+    it 'passes through the creation of export_mappings' do
+      expect(invoices_class.export_mappings['Total Spend']).to eql('TotalValue')
+    end
+
     describe 'the fields' do
       let(:entry) { double 'SubmissionEntry', data: {} }
 

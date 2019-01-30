@@ -114,7 +114,11 @@ module Framework
           end
 
           compiler.send("#{entry_type}_fields").each do |ast_field|
-            field ast_field[:name] || ast_field[:from], compiler.type(ast_field[:type])
+            field(
+              ast_field[:name] || ast_field[:from],
+              compiler.type(ast_field[:type]),
+              exports_to: ast_field[:from]
+            )
           end
         end
       end
