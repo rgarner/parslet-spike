@@ -1,6 +1,9 @@
 require 'framework/definition/compiler'
 
 describe Framework::Definition::Compiler do
+  ##
+  # An AST produced from calling
+  # +Framework::Definition::Parser.new(definition_content).parse+
   let(:ast) {
     {
       framework_short_name: 'CM/OSG/05/3565',
@@ -17,9 +20,9 @@ describe Framework::Definition::Compiler do
           { name: 'LotNumber', from: 'Tier Number', type: 'String' },
           { name: 'ServiceType', from: 'Service Type', type: 'String' },
           { name: 'SubType', from: 'Sub Type', type: 'String' },
-          { type: 'Decimal ', field: 'Additional8', from: 'Somewhere' },
-          { type: 'Decimal ', from: 'Price per Unit', optional: 'optional' },
-          { type: 'Decimal ', from: 'Invoice Line Product / Service Grouping' }
+          { type: 'Decimal', name: 'Additional8', from: 'Somewhere' },
+          { type: 'Decimal', from: 'Price per Unit', optional: 'optional' },
+          { type: 'Decimal', from: 'Invoice Line Product / Service Grouping' }
         ]
       }
     }
@@ -39,32 +42,60 @@ describe Framework::Definition::Compiler do
     end
   end
 
-  it 'includes ActiveModel'
-
   describe 'the Invoices nested class' do
-    subject { compiled::Invoices }
+    subject(:invoices_class) { compiled::Invoices }
 
     it { is_expected.to be < Framework::Definition::EntryData }
+
+    it 'has a model_name' do
+      expect(invoices_class.model_name).to eql('Invoice')
+    end
+
+    describe 'the fields' do
+      let(:entry) { double 'SubmissionEntry', data: {} }
+
+      subject(:invoices) { invoices_class.new(entry) }
+
+      it 'has some fields' do
+        expect(invoices.attributes.length).to eql(
+          ast.dig(:entry_data, :invoice_fields).length)
+      end
+    end
 
     context 'there are no invoice fields' do
       before { ast[:entry_data].delete(:invoice_fields) }
 
       it 'does not generate an Invoices nested class' do
-        expect { compiled::Invoices }.to raise_error(NameError, /Invoices/)
+        expect(compiled.const_defined?('Invoices')).to be false
       end
     end
   end
 
   describe 'the Contracts nested class' do
-    subject { compiled::Contracts }
+    subject(:contracts_class) { compiled::Contracts }
 
     it { is_expected.to be < Framework::Definition::EntryData }
+
+    it 'has a model_name' do
+      expect(contracts_class.model_name).to eql('Contract')
+    end
+
+    describe 'the fields' do
+      let(:entry) { double 'SubmissionEntry', data: {} }
+
+      subject(:contracts) { contracts_class.new(entry) }
+
+      it 'has some fields' do
+        expect(contracts.attributes.length).to eql(
+          ast.dig(:entry_data, :contract_fields).length)
+      end
+    end
 
     context 'there are no contract fields' do
       before { ast[:entry_data].delete(:contract_fields) }
 
       it 'does not generate a Contracts nested class' do
-        expect { compiled::Contracts }.to raise_error(NameError, /Contracts/)
+        expect(compiled.const_defined?('Contracts')).to be false
       end
     end
   end

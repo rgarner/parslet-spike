@@ -114,7 +114,7 @@ puts '*******'
 
 class SimplifyHashTransform < Parslet::Transform
   # Fields without a type are always treated as a String
-  rule(field: simple(:name), from: simple(:from)) do |dict|
+  rule(field: simple(:field), from: simple(:from)) do |dict|
     dict[:type] = 'String'
     dict
   end

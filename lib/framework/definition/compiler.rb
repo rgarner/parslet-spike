@@ -79,27 +79,43 @@ module Framework
       end
     end
 
-
     class Compiler
       def initialize(ast)
         @ast = ast
       end
 
-      def invoices?
+      def invoices_fields
         @ast.dig(:entry_data, :invoice_fields)
       end
 
-      def contracts?
+      def contracts_fields
         @ast.dig(:entry_data, :contract_fields)
       end
 
-      def invoices_class
-        @invoices_class ||= Class.new(EntryData) do
-        end
+      def type(language_type)
+        {
+          'Integer' => :integer,
+          'String' => :string,
+          'Decimal' => :decimal,
+          'Date' => :date,
+          'Boolean' => :boolean
+        }.fetch(language_type)
       end
 
-      def contracts_class
-        @contracts_class ||= Class.new(EntryData) do
+      ##
+      # Generate an +EntryData+ child class for a given entry_type
+      # +entry_type+ one of :invoices, :contracts
+      def entry_data_class(entry_type)
+        compiler = self # method-local binding to be available in Class.new block
+
+        Class.new(EntryData) do
+          define_singleton_method :model_name do
+            entry_type.to_s.capitalize.singularize
+          end
+
+          compiler.send("#{entry_type}_fields").each do |ast_field|
+            field ast_field[:name] || ast_field[:from], compiler.type(ast_field[:type])
+          end
         end
       end
 
@@ -111,8 +127,8 @@ module Framework
           framework_short_name ast[:framework_short_name]
         end
 
-        @klass.const_set('Invoices', invoices_class) if invoices?
-        @klass.const_set('Contracts', contracts_class) if contracts?
+        @klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
+        @klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
 
         @klass
       end
