@@ -4,28 +4,31 @@ require 'bigdecimal'
 class FrameworkDefinitionParser < Parslet::Parser
   root(:framework)
   rule(:framework) do
-    str('Framework') >> space? >> framework_identifier.as(:framework_short_name) >> space? >>
-      framework_block >>
-    space?
+    str('Framework') >>
+      spaced(framework_identifier.as(:framework_short_name)) >>
+      spaced(framework_block)
   end
 
   rule(:framework_block) do
-    lbrace >> metadata >> space? >> invoice_fields.maybe.as(:invoice_fields) >> rbrace
+    braced(
+      spaced(metadata) >>
+      spaced(invoice_fields.maybe.as(:invoice_fields))
+    )
   end
 
   rule(:framework_identifier)   { match(%r{[A-Z0-9/]}).repeat(1) }
   rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1) }
 
   rule(:metadata)               { name >> management_charge }
-  rule(:name)                   { str('Name') >> space? >> string.as(:name) >> space? }
-  rule(:management_charge)      { (str('ManagementChargeRate') >> space? >> percentage).as(:management_charge_rate) >> space? }
-  rule(:percentage)             { float.as(:percentage) >> str('%') >> space? }
+  rule(:name)                   { str('Name') >> spaced(string.as(:name)) }
+  rule(:management_charge)      { (str('ManagementChargeRate') >> spaced(percentage)).as(:management_charge_rate) }
+  rule(:percentage)             { float.as(:percentage) >> str('%') }
 
-  rule(:invoice_fields)         { str('InvoiceFields') >> space >> field_block >> space? }
-  rule(:field_block)            { lbrace >> field_defs >> rbrace }
+  rule(:invoice_fields)         { str('InvoiceFields') >> spaced(field_block) }
+  rule(:field_block)            { braced(field_defs) }
   rule(:field_defs)             { field_def.repeat(1) }
-  rule(:field_def)              { pascal_case_identifier.as(:field) >> space >> typedef.maybe.as(:type) >> field_source >> space? }
-  rule(:field_source)           { space? >> str('from') >> space >> string.as(:from) >> space? >> optional.as(:optional).maybe }
+  rule(:field_def)              { pascal_case_identifier.as(:field) >> spaced(typedef.maybe.as(:type) >> field_source) }
+  rule(:field_source)           { spaced(str('from')) >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
   rule(:typedef)                { str('Integer') | str('String') | str('Decimal') | str('Date') | str('Boolean') }
   rule(:optional)               { str('optional') }
 
@@ -43,6 +46,14 @@ class FrameworkDefinitionParser < Parslet::Parser
 
   rule(:lbrace) { str('{') >> space? }
   rule(:rbrace) { str('}') >> space? }
+
+  def spaced(atom)
+    space? >> atom >> space?
+  end
+
+  def braced(atom)
+    lbrace >> atom >> rbrace
+  end
 end
 
 # InvoiceFields specified in PascalCase.
