@@ -119,18 +119,20 @@ module Framework
         end
       end
 
+      ##
+      # 'Compile' an anonymous class from an abstract syntax tree produced
+      # by +Framework::Definition::Parser+ which corresponds to the
+      # internal DSL
       def compile
         ast = @ast # method-local binding required for Class.new blocks
 
         @klass ||= Class.new(Base) do
           framework_name       ast[:name]
           framework_short_name ast[:framework_short_name]
+        end.tap do |klass|
+          klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
+          klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
         end
-
-        @klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
-        @klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
-
-        @klass
       end
     end
   end
