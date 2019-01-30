@@ -18,14 +18,15 @@ class FrameworkDefinitionParser < Parslet::Parser
 
   rule(:metadata)               { name >> management_charge }
   rule(:name)                   { str('Name') >> space? >> string.as(:name) >> space? }
-  rule(:management_charge)      { str('ManagementChargeRate') >> space? >> percentage).as(:management_charge_rate) >> space? }
+  rule(:management_charge)      { (str('ManagementChargeRate') >> space? >> percentage).as(:management_charge_rate) >> space? }
   rule(:percentage)             { float.as(:percentage) >> str('%') >> space? }
 
-  rule(:invoice_fields)         { str('InvoiceFields') >> space? >> field_block >> space? }
+  rule(:invoice_fields)         { str('InvoiceFields') >> space >> field_block >> space? }
   rule(:field_block)            { lbrace >> field_defs >> rbrace }
   rule(:field_defs)             { field_def.repeat(1) }
-  rule(:field_def)              { pascal_case_identifier.as(:field) >> field_source >> space? }
-  rule(:field_source)           { space? >> str('from') >> space? >> string.as(:from) >> space? >> optional.as(:optional).maybe }
+  rule(:field_def)              { pascal_case_identifier.as(:field) >> space >> typedef.maybe.as(:type) >> field_source >> space? }
+  rule(:field_source)           { space? >> str('from') >> space >> string.as(:from) >> space? >> optional.as(:optional).maybe }
+  rule(:typedef)                { str('Integer') | str('String') | str('Decimal') | str('Date') | str('Boolean') }
   rule(:optional)               { str('optional') }
 
   rule(:string) {
@@ -63,7 +64,7 @@ doc = <<~EOF
       ServiceType from 'Service Type'
       SubType     from 'Sub Type'
 
-      UnitPrice from 'Price per Unit' optional
+      UnitPrice Decimal from 'Price per Unit' optional
     }
   }
 EOF
