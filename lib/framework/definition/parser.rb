@@ -36,7 +36,7 @@ module Framework
 
       ##
       # Things we require and that without will raise a parser error.
-      # Not certain whether these should be here or in the +Compiler+, where
+      # Not certain whether these should be here or in the +Transpiler+, where
       # better error messages can be given if things are missing
       rule(:metadata)               { name >> management_charge }
       rule(:name)                   { str('Name') >> spaced(string.as(:name)) }

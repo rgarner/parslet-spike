@@ -5,7 +5,7 @@ require 'framework/definition/entry_data'
 
 module Framework
   module Definition
-    class Compiler
+    class Transpiler
       def initialize(ast)
         @ast = ast
       end
@@ -32,17 +32,17 @@ module Framework
       # Generate an +EntryData+ child class for a given entry_type
       # +entry_type+ one of :invoices, :contracts
       def entry_data_class(entry_type)
-        compiler = self # method-local binding to be available in Class.new block
+        transpiler = self # method-local binding to be available in Class.new block
 
         Class.new(EntryData) do
           define_singleton_method :model_name do
             entry_type.to_s.capitalize.singularize
           end
 
-          compiler.send("#{entry_type}_fields").each do |ast_field|
+          transpiler.send("#{entry_type}_fields").each do |ast_field|
             field(
               ast_field[:name] || ast_field[:from],
-              compiler.type(ast_field[:type]),
+              transpiler.type(ast_field[:type]),
               exports_to: ast_field[:from]
             )
           end
@@ -50,10 +50,10 @@ module Framework
       end
 
       ##
-      # 'Compile' an anonymous class from an abstract syntax tree produced
+      # Transpile an anonymous class from an abstract syntax tree produced
       # by +Framework::Definition::Parser+ which corresponds to the
       # internal DSL
-      def compile
+      def transpile
         ast = @ast # method-local binding required for Class.new blocks
 
         @klass ||= Class.new(Base) do

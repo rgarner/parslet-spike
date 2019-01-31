@@ -1,6 +1,6 @@
-require 'framework/definition/compiler'
+require 'framework/definition/transpiler'
 
-describe Framework::Definition::Compiler do
+describe Framework::Definition::Transpiler do
   ##
   # An AST produced from calling
   # +Framework::Definition::Parser.new(definition_content).parse+
@@ -29,7 +29,7 @@ describe Framework::Definition::Compiler do
   }
 
   subject(:compiled) do
-    Framework::Definition::Compiler.new(ast).compile
+    Framework::Definition::Transpiler.new(ast).transpile
   end
 
   it 'is an anonymous class' do
