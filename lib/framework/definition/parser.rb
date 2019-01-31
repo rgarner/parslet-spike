@@ -1,3 +1,5 @@
+require 'parslet'
+
 module Framework
   module Definition
     class Parser < Parslet::Parser
