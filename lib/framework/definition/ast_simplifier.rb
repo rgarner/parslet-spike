@@ -10,15 +10,24 @@ class Framework
     # casts the strings to their associated types, but also assumes that fields
     # without a type are Strings to simplify transpilation.
     class ASTSimplifier < Parslet::Transform
+      TYPES = {
+        'Integer' => :integer,
+        'String' => :string,
+        'Decimal' => :decimal,
+        'Date' => :date,
+        'Boolean' => :boolean
+      }.freeze
+
       # Fields without a type are always treated as a String
       rule(field: simple(:field), from: simple(:from)) do |dict|
-        dict[:type] = 'String'
+        dict[:type] = :string
         dict
       end
 
       # Type casts from strings
       rule(string: simple(:s))                 { String(s) }
       rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
+      rule(type: simple(:t))                   { TYPES.fetch(t.to_s) }
     end
   end
 end

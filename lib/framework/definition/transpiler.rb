@@ -18,16 +18,6 @@ class Framework
         @ast.dig(:entry_data, :contract_fields)
       end
 
-      def type(language_type)
-        {
-          'Integer' => :integer,
-          'String' => :string,
-          'Decimal' => :decimal,
-          'Date' => :date,
-          'Boolean' => :boolean
-        }.fetch(language_type)
-      end
-
       ##
       # Generate an +EntryData+ child class for a given entry_type
       # +entry_type+ one of :invoices, :contracts
@@ -41,8 +31,7 @@ class Framework
 
           transpiler.send("#{entry_type}_fields").each do |ast_field|
             field(
-              ast_field[:name] || ast_field[:from],
-              transpiler.type(ast_field[:type]),
+              ast_field[:name] || ast_field[:from], ast_field[:type],
               exports_to: ast_field[:from]
             )
           end

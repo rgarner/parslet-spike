@@ -12,17 +12,18 @@ describe Framework::Definition::Transpiler do
       entry_data: {
         contract_fields:
           [
-            { name: 'TotalValue', from: 'Total Spend', type: 'String' }
+            { name: 'TotalValue', from: 'Total Spend', type: :string },
+            { name: 'Is cromulent', type: :boolean }
           ],
         invoice_fields: [
-          { name: 'TotalValue', from: 'Total Spend', type: 'String' },
-          { name: 'CustomerURN', from: 'Customer URN', type: 'String' },
-          { name: 'LotNumber', from: 'Tier Number', type: 'String' },
-          { name: 'ServiceType', from: 'Service Type', type: 'String' },
-          { name: 'SubType', from: 'Sub Type', type: 'String' },
-          { type: 'Decimal', name: 'Additional8', from: 'Somewhere' },
-          { type: 'Decimal', from: 'Price per Unit', optional: 'optional' },
-          { type: 'Decimal', from: 'Invoice Line Product / Service Grouping' }
+          { name: 'TotalValue', from: 'Total Spend', type: :string },
+          { name: 'CustomerURN', from: 'Customer URN', type: :string },
+          { name: 'LotNumber', from: 'Tier Number', type: :string },
+          { name: 'ServiceType', from: 'Service Type', type: :string },
+          { name: 'SubType', from: 'Sub Type', type: :string },
+          { type: :decimal, name: 'Additional8', from: 'Somewhere' },
+          { type: :decimal, from: 'Price per Unit', optional: 'optional' },
+          { type: :decimal, from: 'Invoice Line Product / Service Grouping' }
         ]
       }
     }
@@ -64,6 +65,11 @@ describe Framework::Definition::Transpiler do
         expect(invoices.attributes.length).to eql(
           ast.dig(:entry_data, :invoice_fields).length)
       end
+
+      it 'has field types as we told it from the AST hash' do
+        expect(invoices_class.attribute_types['Price per Unit']).to be_kind_of(
+          ActiveModel::Type::Decimal)
+      end
     end
 
     context 'there are no invoice fields' do
@@ -92,6 +98,11 @@ describe Framework::Definition::Transpiler do
       it 'has some fields' do
         expect(contracts.attributes.length).to eql(
           ast.dig(:entry_data, :contract_fields).length)
+      end
+
+      it 'has field types as we told it from the AST hash' do
+        expect(contracts_class.attribute_types['Is cromulent']).to be_kind_of(
+          ActiveModel::Type::Boolean)
       end
     end
 

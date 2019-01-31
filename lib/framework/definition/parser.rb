@@ -60,7 +60,7 @@ class Framework
       rule(:unknown_field)          { spaced(typedef).as(:type) >> field_source }
       rule(:field_source)           { spaced(str('from')).maybe >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
       rule(:typedef)                {
-        (str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN)).as(:string)
+        (str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN)).as(:type)
       }
       rule(:optional)               { str('optional').as(:string) }
 

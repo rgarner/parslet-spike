@@ -24,6 +24,7 @@ doc = <<~EOF
 
     ContractFields {
       TotalValue from 'Total Spend'
+      Boolean 'Is cromulent'
     }
 
     InvoiceFields {
