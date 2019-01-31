@@ -1,5 +1,11 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 
+# Running this script is good for tinkering with the heredoc in the middle.
+# It'll print two hashes – the output of the parser in one, and the
+# simplified tree for feeding to a transpiler in the second.
+#
+# The transpiler isn't in use here right now.
+
 require 'parslet'
 require 'bigdecimal'
 require 'framework/definition/parser'
