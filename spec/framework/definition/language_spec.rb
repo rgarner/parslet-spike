@@ -7,15 +7,17 @@ require 'framework/definition/language'
 describe Framework::Definition::Language do
   describe '.generate_framework_class' do
     let(:language) { Framework::Definition::Language }
+    let(:logger)   { spy('Logger') }
 
-    subject(:klass) { language.generate_framework_class(content) }
+    subject(:klass) { language.generate_framework_class(content, logger) }
 
     context 'the content is invalid' do
-      let(:content) { 'Fxramework NotValid {}' }
-      it 'raises an error' do
-        expect { language.generate_framework_class(content) }.to raise_error(
+      let(:content) { 'Framework NotValid {}' }
+      it 'logs and raises an error' do
+        expect { language.generate_framework_class(content, logger) }.to raise_error(
           Parslet::ParseFailed, /Failed to match sequence/
         )
+        expect(logger).to have_received(:error)
       end
     end
 

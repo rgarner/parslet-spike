@@ -2,8 +2,12 @@ require 'framework/definition/parser'
 require 'framework/definition/ast_simplifier'
 require 'framework/definition/transpiler'
 
+require 'pp'
+
 class Framework
   module Definition
+    ##
+    # The API for generating classes from framework definition language
     module Language
       class << self
         ##
@@ -13,22 +17,23 @@ class Framework
         #
         # params
         # +definition_language+ Framework definition language content to parse
-        def generate_framework_class(definition_language)
-          slice = parse(definition_language)
+        def generate_framework_class(definition_language, logger = Logger.new(STDERR))
+          slice = parse(definition_language, logger)
 
+          logger.debug(slice.pretty_inspect)
           simplified_tree = Framework::Definition::ASTSimplifier.new.apply(slice)
           Transpiler.new(simplified_tree).transpile
         end
 
         private
 
-        def parse(definition_language)
+        def parse(definition_language, logger)
           Framework::Definition::Parser.new.parse(
             definition_language,
             reporter: Parslet::ErrorReporter::Deepest.new
           )
         rescue Parslet::ParseFailed => e
-          puts e.parse_failure_cause.ascii_tree
+          logger.error(e.parse_failure_cause.ascii_tree)
           raise
         end
       end
