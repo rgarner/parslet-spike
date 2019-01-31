@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'active_model'
-require 'framework/definition/base'
+require 'framework/definition'
 require 'framework/definition/entry_data'
 
 class Framework
