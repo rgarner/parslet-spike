@@ -56,9 +56,9 @@ class Framework
       def transpile
         ast = @ast # method-local binding required for Class.new blocks
 
-        @klass ||= Class.new(Base) do
-          framework_name       ast[:name]
-          framework_short_name ast[:framework_short_name]
+        @klass ||= Class.new(Framework::Definition::Base) do
+          framework_name       ast[:name].to_s
+          framework_short_name ast[:framework_short_name].to_s
         end.tap do |klass|
           klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
           klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
