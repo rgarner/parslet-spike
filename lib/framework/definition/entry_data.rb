@@ -1,4 +1,4 @@
-module Framework
+class Framework
   module Definition
     class EntryData
       include ActiveModel::Attributes

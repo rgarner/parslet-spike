@@ -3,6 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 require 'parslet'
 require 'bigdecimal'
 require 'framework/definition/parser'
+require 'framework/definition/ast_simplifier'
 
 # InvoiceFields specified in PascalCase.
 # Each field is a known destination with a known type, so type annotations are
@@ -47,17 +48,5 @@ end
 
 puts '*******'
 
-class SimplifyHashTransform < Parslet::Transform
-  # Fields without a type are always treated as a String
-  rule(field: simple(:field), from: simple(:from)) do |dict|
-    dict[:type] = 'String'
-    dict
-  end
-
-  # Type casts from strings
-  rule(string: simple(:s))                 { String(s) }
-  rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
-end
-
-t = SimplifyHashTransform.new
+t = Framework::Definition::ASTSimplifier.new
 pp t.apply(slice)

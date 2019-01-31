@@ -3,7 +3,7 @@ require 'active_model'
 require 'framework/definition/base'
 require 'framework/definition/entry_data'
 
-module Framework
+class Framework
   module Definition
     class Transpiler
       def initialize(ast)
