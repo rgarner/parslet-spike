@@ -31,8 +31,8 @@ class Framework
 
       ##
       # Identifiers
-      rule(:framework_identifier)   { match(%r{[A-Z0-9/]}).repeat(1) }
-      rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1) }
+      rule(:framework_identifier)   { match(%r{[A-Z0-9/]}).repeat(1).as(:string) }
+      rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1).as(:string) }
 
       ##
       # Things we require and that without will raise a parser error.
@@ -55,11 +55,14 @@ class Framework
       # Rules for an individual field
       rule(:field_def)              { known_field | additional_field | unknown_field }
       rule(:known_field)            { pascal_case_identifier.as(:field) >> field_source }
-      rule(:additional_field)       { spaced(typedef).as(:type) >> (str('Additional') >> match(/[1-8]/)).as(:field) >> field_source }
+      rule(:additional_field)       { spaced(typedef).as(:type) >> additional_field_name.as(:field) >> field_source }
+      rule(:additional_field_name)  { (str('Additional') >> match(/[1-8]/)).as(:string) }
       rule(:unknown_field)          { spaced(typedef).as(:type) >> field_source }
       rule(:field_source)           { spaced(str('from')).maybe >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
-      rule(:typedef)                { str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN) }
-      rule(:optional)               { str('optional') }
+      rule(:typedef)                {
+        (str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN)).as(:string)
+      }
+      rule(:optional)               { str('optional').as(:string) }
 
       ##
       # Primitive types

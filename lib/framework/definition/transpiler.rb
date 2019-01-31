@@ -57,8 +57,8 @@ class Framework
         ast = @ast # method-local binding required for Class.new blocks
 
         @klass ||= Class.new(Framework::Definition::Base) do
-          framework_name       ast[:name].to_s
-          framework_short_name ast[:framework_short_name].to_s
+          framework_name       ast[:name]
+          framework_short_name ast[:framework_short_name]
         end.tap do |klass|
           klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
           klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
