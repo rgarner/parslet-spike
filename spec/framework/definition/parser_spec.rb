@@ -40,5 +40,24 @@ describe Framework::Definition::Parser do
         it { is_expected.to parse("Decimal 'Price of fish'") }
       end
     end
+
+    describe '#lookups_block' do
+      subject { parser.lookups_block }
+
+      context 'a single lookup with multiple values' do
+        it {
+          is_expected.to parse(
+            <<~FDL
+              Lookups {
+                UnitOfMeasure [
+                  'Day'
+                  'Each'
+                ]
+              }
+            FDL
+          )
+        }
+      end
+    end
   end
 end

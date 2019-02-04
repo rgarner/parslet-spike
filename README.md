@@ -5,8 +5,9 @@ Just run `./run_parslet.rb`, which has everything in it.
 
 ## Nascent language documentation
 
-Framework definitions let you define your framework, its metadata, and all the product table
-lookups you need to validate within lists.
+Framework definitions let you define your framework, its metadata, destination
+fields in the data warehouse, where they came from, their types, and all the product table
+lookups you need to validate values within lists.
 
 A framework definition looks a bit like this:
 
@@ -24,6 +25,13 @@ A framework definition looks a bit like this:
      SubType     from 'Sub Type'
 
      UnitPrice from 'Price per Unit' optional
+   }
+   
+   Lookups {
+     UnitPrice [
+       'Day'
+       'Each'
+     ]
    }
  } 
 ```
@@ -100,3 +108,16 @@ empty value.
 For example:
 
 `UnitPrice from 'Price per Unit' optional`
+
+## Lookups
+
+Lookups can be defined in a `Lookups` block. Each lookup is a named array of strings, for example:
+
+```
+  Lookups {
+    UnitPrice {
+      'Day'
+      'Each'
+    }
+  }
+```

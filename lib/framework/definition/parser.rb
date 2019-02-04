@@ -25,7 +25,8 @@ class Framework
       rule(:framework_block) do
         braced(
           spaced(metadata) >>
-            spaced(fields_blocks.maybe.as(:entry_data))
+          spaced(fields_blocks.maybe.as(:entry_data)) >>
+          spaced(lookups_block.maybe).as(:lookups)
         )
       end
 
@@ -65,6 +66,14 @@ class Framework
       rule(:optional)               { str('optional').as(:string) }
 
       ##
+      # Lookups
+      rule(:lookups_block)   { spaced(str('Lookups')) >> braced(lookups) }
+      rule(:lookups)         { lookup.repeat(1) }
+      rule(:lookup)          { spaced(pascal_case_identifier.as(:lookup_name)) >> string_array }
+      rule(:string_array)    { square_bracketed(list_of_strings).repeat(1) }
+      rule(:list_of_strings) { (spaced(string).as(:string_list_value) >> str(',').maybe).repeat(1) }
+
+      ##
       # Primitive types
       rule(:string) {
         str("'") >> (
@@ -77,11 +86,14 @@ class Framework
 
       ##
       # Spacing and bracing, including helper methods.
-      rule(:space)  { match('\s').repeat(1) }
-      rule(:space?) { space.maybe }
+      rule(:space)   { match('\s').repeat(1) }
+      rule(:space?)  { space.maybe }
 
-      rule(:lbrace) { str('{') >> space? }
-      rule(:rbrace) { str('}') >> space? }
+      rule(:lbrace)  { str('{') >> space? }
+      rule(:rbrace)  { str('}') >> space? }
+
+      rule(:lsquare) { str('[') >> space? }
+      rule(:rsquare) { str(']') >> space? }
 
       ##
       # It is often the case that we need spaces before and after
@@ -95,6 +107,13 @@ class Framework
       # lbrace >> atom 1 >> atom2 >> brace in most situations.
       def braced(atom)
         lbrace >> atom >> rbrace
+      end
+
+      ##
+      # braced(atom1 >> atom 2) reads better than
+      # lbrace >> atom 1 >> atom2 >> brace in most situations.
+      def square_bracketed(atom)
+        lsquare >> atom >> rsquare
       end
     end
   end

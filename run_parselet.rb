@@ -41,6 +41,18 @@ doc = <<~EOF
 
       Decimal 'Invoice Line Product / Service Grouping'
     }
+
+    Lookups {
+      UnitOfMeasure [
+        'Day'
+        'Each'
+      ]
+
+      UnitOfBlah [
+        'Blah'
+        'Blah'
+      ]
+    }
   }
 EOF
 
