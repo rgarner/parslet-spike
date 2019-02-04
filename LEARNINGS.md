@@ -63,8 +63,7 @@ familiarity with, and security access to,
  
  ### Unimplemented things
  
- - The `total_value_field` method is not implemented - the field itself is defined
-   but we aren't telling the anonymous inner classes which field it is
+ - `optional` fields should `allow_nil: true`
    
  ### Semantic checking and human-readable errors
  

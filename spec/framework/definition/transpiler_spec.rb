@@ -52,6 +52,10 @@ describe Framework::Definition::Transpiler do
       expect(invoices_class.model_name).to eql('Invoice')
     end
 
+    it 'has a total_value_field' do
+      expect(invoices_class.total_value_field).to eql('Total Spend')
+    end
+
     it 'passes through the creation of export_mappings' do
       expect(invoices_class.export_mappings['Total Spend']).to eql('TotalValue')
     end
@@ -88,6 +92,10 @@ describe Framework::Definition::Transpiler do
 
     it 'has a model_name' do
       expect(contracts_class.model_name).to eql('Contract')
+    end
+
+    it 'has a total_value_field' do
+      expect(contracts_class.total_value_field).to eql('Total Spend')
     end
 
     describe 'the fields' do

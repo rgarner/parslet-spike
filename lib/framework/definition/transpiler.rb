@@ -10,12 +10,8 @@ class Framework
         @ast = ast
       end
 
-      def invoices_fields
-        @ast.dig(:entry_data, :invoice_fields)
-      end
-
-      def contracts_fields
-        @ast.dig(:entry_data, :contract_fields)
+      def field_defs(entry_type)
+        @ast.dig(:entry_data, "#{entry_type}_fields".to_sym)
       end
 
       ##
@@ -29,10 +25,16 @@ class Framework
             entry_type.to_s.capitalize.singularize
           end
 
-          transpiler.send("#{entry_type}_fields").each do |ast_field|
+          # invoice_fields or contract_fields
+          _field_defs      = transpiler.field_defs(entry_type)
+          _total_value_def = _field_defs.find { |f| f[:name] == 'TotalValue' }
+
+          total_value_field _total_value_def[:from]
+
+          _field_defs.each do |field_def|
             field(
-              ast_field[:name] || ast_field[:from], ast_field[:type],
-              exports_to: ast_field[:from]
+              field_def[:name] || field_def[:from], field_def[:type],
+              exports_to: field_def[:from]
             )
           end
         end
@@ -49,8 +51,8 @@ class Framework
           framework_name       ast[:name]
           framework_short_name ast[:framework_short_name]
         end.tap do |klass|
-          klass.const_set('Invoices', entry_data_class(:invoices)) if invoices_fields
-          klass.const_set('Contracts', entry_data_class(:contracts)) if contracts_fields
+          klass.const_set('Invoices', entry_data_class(:invoice)) if field_defs(:invoice)
+          klass.const_set('Contracts', entry_data_class(:contract)) if field_defs(:contract)
         end
       end
     end
