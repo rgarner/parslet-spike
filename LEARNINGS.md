@@ -64,6 +64,8 @@ familiarity with, and security access to,
  ### Unimplemented things
  
  - `optional` fields should `allow_nil: true`
+ - `Transpiler` doesn't currently output validations for dependent fields, 
+   that's only implemented in the parser 
    
  ### Semantic checking and human-readable errors
  
