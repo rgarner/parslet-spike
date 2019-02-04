@@ -19,6 +19,14 @@ familiarity with, and security access to,
 
 - Parslet is about as easy as you could make a parser for Ruby devs
 - The resulting language does restrict concepts to bare domain language
+- We get assurance that a framework is correct – assurance that it would be hard
+  to get from anywhere else. Invoice/Contract fields always have at least one field, always
+  include a Total Value field, frameworks always have a name and a short name, lookups can't
+  have duplicate values, and types are restricted
+- We get a choice as to how a framework is made live, where we store the definition.
+  and what access is required to make it so. It could be as simple as a field in `frameworks`.
+- Having FDL recognises that defining a framework is an iterative process and positions such 
+  definition as a quasi-development activity rather than field-filling
 
 ### The neutral
 
@@ -26,15 +34,17 @@ familiarity with, and security access to,
   requires testing and iteration. We would need a sandbox.
 - Parslet's parser and transforms only help with making an abstract syntax tree (AST).
   We are responsible for working on that tree and creating our anonymous `ActiveModel`-based
-  object based on its output. 
+  object based on its output via the `Transpiler` and whatever secondary post-parse checks
+  we need. 
 
 ### The bad
 
 - The language needs to evolve in lockstep with the business. 
   If business concepts will change continuously this is not a good fit.
 - Parser practices (via parslet) are unfamiliar to most devs
-- parslet does not help you with good error messages (or at least, we haven't found out 
-  how we should do this yet). This is the result of failing to
+- parslet does not help you with good error messages (we can mitigate this somewhat by
+  making the parser smaller and simpler and doing a semantic check later in the pipeline, 
+  see "Things we still need to do" below). This is the result of failing to
   spell 'Lookups' correctly:
   ```
   Failed to match sequence ('Framework' SPACE? framework_short_name:FRAMEWORK_IDENTIFIER SPACE? SPACE? FRAMEWORK_BLOCK SPACE?) at line 1 char 26.
@@ -44,3 +54,76 @@ familiarity with, and security access to,
            `- Expected "}", but got "L" at line 26 char 3.
   ```
  
+ ## Things we still need to do
+ 
+ ### Debugging
+ 
+ Find a good way of outputting the class as it would look in Ruby. The anonymous class may behave well 
+ but debugging would be harder.
+ 
+ ### Unimplemented things
+ 
+ - The `total_value_field` method is not implemented - the field itself is defined
+   but we aren't telling the anonymous inner classes which field it is
+   
+ ### Semantic checking and human-readable errors
+ 
+ There needs to be a separate post-parse semantic checking step for errors. At present (where 'FDL' is 
+   "Framework Definition Language")the pipeline is:
+   ```
+     FDL -> parser -> ASTSimplifier -> Transpiler -> Anonymous class
+            |
+            \ parse errors
+   ```
+   whereas it could (should) be
+   ```
+     FDL -> parser -> ASTSimplifier -> Semantic checker -> Transpiler -> Anonymous class
+            |                          |
+            \ parse errors             \ semantic errors
+   ```
+   
+ #### Example semantic errors
+ 
+ 1. Invalid metadata
+ ```
+ # Presently the parser would reject this but this should not be
+ # the parser's job
+ Framework RM1234 {
+   Blastoise 'Hello'
+ }
+
+->
+ Line 4: "Blastoise" is not a valid piece of framework metadata
+ ```
+ 
+ 2. Lookup checking
+ ```
+    Framework RM1234 {
+      ...
+      Lookups {
+        UnitOfMeasure [
+          'Day'
+          'Day'            
+        ]
+      }
+    }
+ 
+ ->
+ Line 6: Duplicate value "Day" in Lookup UnitOfMeasure
+ ```
+ 
+ 3. Unknown type of field
+ 
+ ```
+   Framework RM1234 {
+     ...
+     InvoiceFields {
+       ...
+       Snivey SomeFieldName from 'Some field name'
+       ...
+     }
+   }
+  
+ ->
+ Line 5: Unknown field or lookup type "Snivey"
+ ```
