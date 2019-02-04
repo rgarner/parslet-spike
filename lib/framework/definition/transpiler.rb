@@ -24,7 +24,7 @@ class Framework
       def entry_data_class(entry_type)
         transpiler = self # method-local binding to be available in Class.new block
 
-        Class.new(EntryData) do
+        Class.new(Framework::Definition::EntryData) do
           define_singleton_method :model_name do
             entry_type.to_s.capitalize.singularize
           end
