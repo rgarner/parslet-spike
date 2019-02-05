@@ -59,5 +59,19 @@ describe Framework::Definition::Parser do
         }
       end
     end
+
+    describe '#depends_on' do
+      subject { parser.depends_on }
+      it {
+        is_expected.to parse(
+          <<~FDL
+            depends_on LotNumber {
+              '1' -> Lot1Services,
+              '2' -> Lot2Services
+            }
+          FDL
+        )
+      }
+    end
   end
 end

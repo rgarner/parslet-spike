@@ -12,16 +12,16 @@ describe Framework::Definition::Transpiler do
       entry_data: {
         contract_fields:
           [
-            { name: 'TotalValue', from: 'Total Spend', type: :string },
-            { name: 'Is cromulent', type: :boolean }
+            { field: 'TotalValue', from: 'Total Spend', type: :string },
+            { field: 'Is cromulent', type: :boolean }
           ],
         invoice_fields: [
-          { name: 'TotalValue', from: 'Total Spend', type: :string },
-          { name: 'CustomerURN', from: 'Customer URN', type: :string },
-          { name: 'LotNumber', from: 'Tier Number', type: :string },
-          { name: 'ServiceType', from: 'Service Type', type: :string },
-          { name: 'SubType', from: 'Sub Type', type: :string },
-          { type: :decimal, name: 'Additional8', from: 'Somewhere' },
+          { field: 'TotalValue', from: 'Total Spend', type: :string },
+          { field: 'CustomerURN', from: 'Customer URN', type: :string },
+          { field: 'LotNumber', from: 'Tier Number', type: :string },
+          { field: 'ServiceType', from: 'Service Type', type: :string },
+          { field: 'SubType', from: 'Sub Type', type: :string },
+          { type: :decimal, field: 'Additional8', from: 'Somewhere' },
           { type: :decimal, from: 'Price per Unit', optional: 'optional' },
           { type: :decimal, from: 'Invoice Line Product / Service Grouping' }
         ]

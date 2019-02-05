@@ -27,15 +27,18 @@ class Framework
 
           # invoice_fields or contract_fields
           _field_defs      = transpiler.field_defs(entry_type)
-          _total_value_def = _field_defs.find { |f| f[:name] == 'TotalValue' }
+          _total_value_def = _field_defs.find { |f| f[:field] == 'TotalValue' }
 
           total_value_field _total_value_def[:from]
 
           _field_defs.each do |field_def|
-            field(
-              field_def[:name] || field_def[:from], field_def[:type],
-              exports_to: field_def[:from]
-            )
+            _name    = field_def[:field] || field_def[:from]
+            _type    = field_def[:type]
+            _options = {}.tap do |options|
+              options[:exports_to] = field_def[:from]
+            end.compact
+
+            field _name, _type, _options
           end
         end
       end

@@ -24,7 +24,8 @@ doc = <<~EOF
 
     ContractFields {
       TotalValue from 'Total Spend'
-      Boolean 'Is cromulent'
+
+      Boolean 'Is Cromulent'
     }
 
     InvoiceFields {
@@ -32,14 +33,18 @@ doc = <<~EOF
 
       CustomerURN from 'Customer URN'
       LotNumber   from 'Tier Number'
-      ServiceType from 'Service Type'
-      SubType     from 'Sub Type'
 
-      Decimal Additional8 from 'Somewhere'
+      UnitOfMeasure from 'Unit of measure'
 
-      Decimal 'Price per Unit' optional
+      ProductGroup from 'Service Provided' depends_on LotNumber {
+        '1' -> Lot1Services,
+        '2' -> Lot2Services
+      }
 
-      Decimal 'Invoice Line Product / Service Grouping'
+      Decimal Additional8 from 'A framework-specific field that is validated and warehoused'
+
+      Decimal 'Some optional field that gets validated but not sent anywhere' optional
+      Decimal 'Some mandatory field that gets validated but not sent anywhere'
     }
 
     Lookups {
@@ -48,9 +53,21 @@ doc = <<~EOF
         'Each'
       ]
 
-      UnitOfBlah [
-        'Blah'
-        'Blah'
+      Lot1Services [
+        'User Experience and Design'
+        'Performance Analysis and Data'
+        'Security'
+        'Service Delivery'
+        'Software Development'
+        'Support and Operations'
+        'Testing and Auditing'
+        'User Research'
+      ]
+
+      Lot2Services [
+        'Agile Coach'
+        'Business Analyst'
+        'Communications Manager'
       ]
     }
   }
@@ -59,7 +76,7 @@ EOF
 Framework::Definition::Parser.new.pascal_case_identifier.parse('FrankZappa')
 
 begin
-  slice = Framework::Definition::Parser.new.parse(doc, reporter: Parslet::ErrorReporter::Deepest.new)
+  slice = Framework::Definition::Parser.new.parse(doc, reporter: Parslet::ErrorReporter::Contextual.new)
   pp slice
 rescue Parslet::ParseFailed => e
   puts e.parse_failure_cause.ascii_tree

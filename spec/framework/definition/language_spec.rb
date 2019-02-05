@@ -21,12 +21,25 @@ describe Framework::Definition::Language do
       end
     end
 
-    context 'the content is minimally valid' do
+    # Our largest integration test
+    context 'the content represents as many use cases as possible' do
       let(:content) do
         <<~FDL
           Framework RM3786 {
             Name 'Minimally valid'
             ManagementChargeRate 1.5%
+
+            InvoiceFields {
+              TotalValue    from 'Total Spend'
+              UnitOfMeasure from 'Unit of Measure'
+            }
+
+            Lookups {
+              UnitOfMeasure [
+                'Day'
+                'Each'
+              ]
+            }
           }
         FDL
       end

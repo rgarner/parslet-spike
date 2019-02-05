@@ -33,7 +33,7 @@ class Framework
       ##
       # Identifiers
       rule(:framework_identifier)   { match(%r{[A-Z0-9/]}).repeat(1).as(:string) }
-      rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z]/).repeat).repeat(1).as(:string) }
+      rule(:pascal_case_identifier) { (match(/[A-Z]/) >> match(/[a-z0-9]/).repeat).repeat(1).as(:string) }
 
       ##
       # Things we require and that without will raise a parser error.
@@ -55,15 +55,19 @@ class Framework
       ##
       # Rules for an individual field
       rule(:field_def)              { known_field | additional_field | unknown_field }
-      rule(:known_field)            { pascal_case_identifier.as(:field) >> field_source }
-      rule(:additional_field)       { spaced(typedef).as(:type) >> additional_field_name.as(:field) >> field_source }
+      rule(:known_field)            { pascal_case_identifier.as(:field) >> field_opts }
+      rule(:additional_field)       { spaced(typedef).as(:type) >> additional_field_name.as(:field) >> field_opts }
       rule(:additional_field_name)  { (str('Additional') >> match(/[1-8]/)).as(:string) }
-      rule(:unknown_field)          { spaced(typedef).as(:type) >> field_source }
-      rule(:field_source)           { spaced(str('from')).maybe >> string.as(:from) >> spaced(optional.as(:optional).maybe) }
+      rule(:unknown_field)          { spaced(typedef).as(:type) >> field_opts }
+      rule(:field_opts)             { field_source >> spaced(optional.as(:optional).maybe) >> depends_on.as(:depends_on).maybe }
+      rule(:field_source)           { spaced(str('from')).maybe >> string.as(:from) }
       rule(:typedef)                {
         (str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN)).as(:type)
       }
-      rule(:optional)               { str('optional').as(:string) }
+      rule(:optional)   { str('optional').as(:string) }
+      rule(:depends_on) { spaced(str('depends_on')) >> pascal_case_identifier.as(:field_name) >> space? >> dict }
+      rule(:dict)       { braced((key_value >> str(',').maybe).repeat(1)) }
+      rule(:key_value)  { spaced(string.as(:key) >> spaced(str('->')) >> pascal_case_identifier.as(:value)) }
 
       ##
       # Lookups
