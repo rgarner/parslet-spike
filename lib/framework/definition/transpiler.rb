@@ -3,6 +3,8 @@ require 'active_model'
 require 'framework/definition'
 require 'framework/definition/entry_data'
 
+require 'validators/case_insensitive_inclusion_validator'
+
 class Framework
   module Definition
     class Transpiler
@@ -34,8 +36,9 @@ class Framework
           _field_defs.each do |field_def|
             _name    = field_def[:field] || field_def[:from]
             _type    = field_def[:type]
-            _options = {}.tap do |options|
+            _options = { presence: true }.tap do |options|
               options[:exports_to] = field_def[:from]
+              transpiler.add_lookup_validation(options, field_def)
             end.compact
 
             field _name, _type, _options
@@ -57,6 +60,12 @@ class Framework
           klass.const_set('Invoices', entry_data_class(:invoice)) if field_defs(:invoice)
           klass.const_set('Contracts', entry_data_class(:contract)) if field_defs(:contract)
         end
+      end
+
+      def add_lookup_validation(options, field_def)
+        lookup = @ast.dig(:lookups, field_def[:field])
+
+        options[:case_insensitive_inclusion] = { in: [] } if lookup
       end
     end
   end

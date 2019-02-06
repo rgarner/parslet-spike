@@ -71,10 +71,10 @@ class Framework
 
       ##
       # Lookups
-      rule(:lookups_block)   { spaced(str('Lookups')) >> braced(lookups) }
+      rule(:lookups_block)   { spaced(str('Lookups')) >> braced(lookups).as(:lookups_list) }
       rule(:lookups)         { lookup.repeat(1) }
       rule(:lookup)          { spaced(pascal_case_identifier.as(:lookup_name)) >> string_array }
-      rule(:string_array)    { square_bracketed(list_of_strings).repeat(1) }
+      rule(:string_array)    { square_bracketed(list_of_strings).as(:values) }
       rule(:list_of_strings) { (spaced(string).as(:string_list_value) >> str(',').maybe).repeat(1) }
 
       ##

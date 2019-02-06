@@ -28,6 +28,12 @@ class Framework
       rule(string: simple(:s))                 { String(s) }
       rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
       rule(type: simple(:t))                   { TYPES.fetch(t.to_s) }
+      rule(string_list_value: simple(:s))      { String(s) }
+      rule(lookups_list: subtree(:list)) do
+        list.each_with_object({}) do |lookup, result|
+          result[lookup[:lookup_name]] = lookup[:values]
+        end
+      end
     end
   end
 end

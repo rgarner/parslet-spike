@@ -49,6 +49,20 @@ describe Framework::Definition::Language do
       it 'has the framework_name' do
         expect(klass.framework_name).to eql('Minimally valid')
       end
+
+      describe 'The invoice fields' do
+        subject(:invoices_class) { klass::Invoices }
+
+        it 'validates inclusion for the UnitOfMeasure case insensitively' do
+          expect(invoices_class.validators).to include(
+            an_object_having_attributes(
+              class: CaseInsensitiveInclusionValidator,
+              attributes: ['UnitOfMeasure']
+            )
+          )
+        end
+      end
+
     end
   end
 end
