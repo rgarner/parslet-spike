@@ -1,13 +1,21 @@
 # parslet-spike
 
-Figure out what we can do with [parslet](http://kschiess.github.io/parslet/) and establish some framework definition principles.
+Establish some framework definition principles and figure out what we can do 
+with [parslet](http://kschiess.github.io/parslet/).
+
 Just run `./run_parslet.rb`, which has everything in it.
 
 ## Nascent language documentation
 
 Framework definitions let you define your framework, its metadata, destination
 fields in the data warehouse, where they came from, their types, and all the product table
-lookups you need to validate values within lists.
+lookups you need to validate values within lists. The key them is *authority*. 
+This authoritative source can then inform:
+
+- Type coercion on ingest
+- Validations
+- Exports to the data warehouse
+- Spreadsheet generation
 
 A framework definition looks a bit like this:
 

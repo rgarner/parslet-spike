@@ -13,11 +13,31 @@ familiarity with, and security access to,
   This should not be an end-user job, although the framework definitions could go in
   their own repo.
   
+## Design
+
+### Purpose
+
+The language should:
+
+- Define metadata
+- Define validations
+- Define the data warehouse destination
+- Define the spreadsheet source for fields
+
+### Principles
+
+- Keep it clean. This isn't a programming language; its primary purpose
+  is to define, and define clearly
+- Avoid repetition. This is going to need to be as terse as we can make it
+  without sacrificing readability
+- Use conventions from the domain. Types, for example, are always PascalCased
+  because the target warehouse fields are PascalCased and the names of these
+  fields form a basis for agreement
+  
 ## What we've learned
 
 ### The good
 
-- Parslet is about as easy as you could make a parser for Ruby devs
 - The resulting language does restrict concepts to bare domain language
 - We get assurance that a framework is correct – assurance that it would be hard
   to get from anywhere else. Invoice/Contract fields always have at least one field, always
@@ -27,6 +47,7 @@ familiarity with, and security access to,
   and what access is required to make it so. It could be as simple as a field in `frameworks`.
 - Having FDL recognises that defining a framework is an iterative process and positions such 
   definition as a quasi-development activity rather than field-filling
+- Parslet is about as easy as you could make a parser for Ruby devs
 
 ### The neutral
 
@@ -63,11 +84,14 @@ familiarity with, and security access to,
  
  ### Unimplemented things
  
- - `optional` fields should `allow_nil: true`
- - `Transpiler` doesn't currently output validations for dependent fields, 
-   that's only implemented in the parser 
+- `optional` fields should `allow_nil: true`
+- While we refer to "Known Fields" a lot, we haven't defined them.
+  We should define them based on existing `exports_to` targets and 
+  [MISO CSV](https://drive.google.com/file/d/1xLAABbqm1JQJhyMaXrqJc4FVpaNHcpGt/view) 
+  values. Field types can be any of a Known Field, a Lookup name, or a primitive
+  such as `Decimal`
    
- ### Semantic checking and human-readable errors
+ #### Semantic checking and human-readable errors
  
  There needs to be a separate post-parse semantic checking step for errors. At present (where 'FDL' is 
    "Framework Definition Language")the pipeline is:
