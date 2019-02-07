@@ -2,6 +2,14 @@ require 'parslet'
 
 class Framework
   module Definition
+    ##
+    # The parser is only responsible for generating and annotating
+    # a concrete syntax tree (CST). We don't work with those because
+    # they're unwieldy and they contain Parslet +Slice+ objects instead
+    # of strings. We feed them to the +AST::Simplifier+ to
+    # boil them down to much simpler hashes while also making those
+    # +Slice+ objects, e.g. 'Some string'@174' into plain old
+    # +String+s
     class Parser < Parslet::Parser
       ##
       # Explicit field types used when a field is not a +known_field+

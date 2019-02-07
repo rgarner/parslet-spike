@@ -2,8 +2,12 @@ require 'spec_helper'
 require 'framework/definition/language'
 
 ##
-# An integration test of the +Parser+, the +Transpiler+
-# and the +ASTSimplifier+
+# An integration test of the +Parser+, the +AST::Simplifier+
+# and the +Transpiler+. It's not very big because the spike didn't start
+# here (it started with run_parslet.rb), but this spec
+# should probably drive development in a real-world scenario
+# and in preference to transpiler_spec.rb - see comments there
+# for why
 describe Framework::Definition::Language do
   describe '.generate_framework_class' do
     let(:language) { Framework::Definition::Language }

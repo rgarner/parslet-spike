@@ -1,6 +1,11 @@
 require 'spec_helper'
 require 'framework/definition/parser'
 
+##
+# These specs are for pure syntax. They help you examine
+# how parts of the grammar work in isolation. The spike
+# is not exhaustive, as development was driven from the
+# +run_parslet.rb+ script.
 describe Framework::Definition::Parser do
   subject(:parser) { Framework::Definition::Parser.new }
 

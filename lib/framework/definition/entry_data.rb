@@ -1,5 +1,7 @@
 class Framework
   module Definition
+    ##
+    # Copied over from the API project for speed
     class EntryData
       include ActiveModel::Attributes
       include ActiveModel::Validations

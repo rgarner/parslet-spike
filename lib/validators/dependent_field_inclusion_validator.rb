@@ -1,3 +1,5 @@
+##
+# Copied from the API project for speed
 class DependentFieldInclusionValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     parent_field_name = options[:parent]

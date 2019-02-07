@@ -1,4 +1,5 @@
 class Framework
+  # Copied from the API project for speed
   module Definition
     class MissingError < StandardError; end
 

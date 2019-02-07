@@ -1,5 +1,15 @@
 require 'framework/definition/transpiler'
 
+##
+# The transpiler spec is useful but comes at a cost.
+# We need a mock ast tree that has been generated from a parser.
+# In this case we've copied and pasted some of that output, but
+# it can fall out of sync with the main parser easily.
+#
+# In a real-world development we might flesh out language_spec
+# a lot more instead. That's an integration test, but it would
+# be a lot faster to iterate by changing elements of FDL and
+# not trying to replicate a whole AST.
 describe Framework::Definition::Transpiler do
   ##
   # An AST produced from calling
@@ -29,22 +39,25 @@ describe Framework::Definition::Transpiler do
     }
   }
 
-  subject(:compiled) do
+  subject(:generated) do
     Framework::Definition::Transpiler.new(ast).transpile
   end
 
   it 'is an anonymous class' do
-    expect(compiled.class).to eql(Class)
+    expect(generated.class).to eql(Class)
   end
 
   describe 'the metadata' do
     it 'knows its name' do
-      expect(compiled.framework_name).to eql(ast[:name])
+      expect(generated.framework_name).to eql(ast[:name])
+    end
+    it 'knows its short name' do
+      expect(generated.framework_short_name).to eql(ast[:framework_short_name])
     end
   end
 
   describe 'the Invoices nested class' do
-    subject(:invoices_class) { compiled::Invoices }
+    subject(:invoices_class) { generated::Invoices }
 
     it { is_expected.to be < Framework::Definition::EntryData }
 
@@ -80,13 +93,13 @@ describe Framework::Definition::Transpiler do
       before { ast[:entry_data].delete(:invoice_fields) }
 
       it 'does not generate an Invoices nested class' do
-        expect(compiled.const_defined?('Invoices')).to be false
+        expect(generated.const_defined?('Invoices')).to be false
       end
     end
   end
 
   describe 'the Contracts nested class' do
-    subject(:contracts_class) { compiled::Contracts }
+    subject(:contracts_class) { generated::Contracts }
 
     it { is_expected.to be < Framework::Definition::EntryData }
 
@@ -118,7 +131,7 @@ describe Framework::Definition::Transpiler do
       before { ast[:entry_data].delete(:contract_fields) }
 
       it 'does not generate a Contracts nested class' do
-        expect(compiled.const_defined?('Contracts')).to be false
+        expect(generated.const_defined?('Contracts')).to be false
       end
     end
   end

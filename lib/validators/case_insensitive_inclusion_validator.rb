@@ -1,3 +1,5 @@
+##
+# Copied from the API project for speed
 class CaseInsensitiveInclusionValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     valid_values = Array(options[:in]).map(&:downcase)
