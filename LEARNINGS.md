@@ -75,23 +75,24 @@ The language should:
            `- Expected "}", but got "L" at line 26 char 3.
   ```
  
- ## Things we still need to do
+## Things we still need to do
  
- ### Debugging
+### Debugging
  
- Find a good way of outputting the class as it would look in Ruby. The anonymous class may behave well 
- but debugging would be harder.
+Find a good way of outputting the class as it would look in Ruby. The anonymous class may behave well 
+but debugging would be harder.
  
- ### Unimplemented things
+### Unimplemented things
  
-- `optional` fields should `allow_nil: true`
-- While we refer to "Known Fields" a lot, we haven't defined them.
-  We should define them based on existing `exports_to` targets and 
-  [MISO CSV](https://drive.google.com/file/d/1xLAABbqm1JQJhyMaXrqJc4FVpaNHcpGt/view) 
-  values. Field types can be any of a Known Field, a Lookup name, or a primitive
-  such as `Decimal`
+#### Known field definitions
+ 
+While we refer to "Known Fields" a lot, we haven't defined them.
+We should define them based on existing `exports_to` targets and 
+[MISO CSV](https://drive.google.com/file/d/1xLAABbqm1JQJhyMaXrqJc4FVpaNHcpGt/view) 
+values. Field types can be any of a Known Field, a Lookup name, or a primitive
+such as `Decimal`
    
- #### Semantic checking and human-readable errors
+#### Semantic checking and human-readable errors
  
  There needs to be a separate post-parse semantic checking step for errors. At present (where 'FDL' is 
    "Framework Definition Language")the pipeline is:

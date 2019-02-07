@@ -87,6 +87,15 @@ describe Framework::Definition::Transpiler do
         expect(invoices_class.attribute_types['Price per Unit']).to be_kind_of(
           ActiveModel::Type::Decimal)
       end
+
+      it 'maps optional fields to allow_nil: true' do
+        expect(invoices_class.validators).to include(
+          an_object_having_attributes(
+            attributes: ['Price per Unit'],
+            options: { allow_nil: true }
+          )
+        )
+      end
     end
 
     context 'there are no invoice fields' do

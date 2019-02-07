@@ -38,6 +38,7 @@ class Framework
             _type    = field_def[:type]
             _options = { presence: true }.tap do |options|
               options[:exports_to] = field_def[:from]
+              options[:allow_nil] = true if field_def[:optional]
               transpiler.add_lookup_validation(options, field_def, entry_type)
             end.compact
 
