@@ -2,18 +2,18 @@
 require 'active_model'
 require 'framework/definition'
 require 'framework/definition/entry_data'
+require 'framework/definition/AST/presenter'
 
 require 'validators/case_insensitive_inclusion_validator'
+require 'validators/dependent_field_inclusion_validator'
 
 class Framework
   module Definition
     class Transpiler
-      def initialize(ast)
-        @ast = ast
-      end
+      attr_reader :ast
 
-      def field_defs(entry_type)
-        @ast.dig(:entry_data, "#{entry_type}_fields".to_sym)
+      def initialize(ast)
+        @ast = AST::Presenter.new(ast)
       end
 
       ##
@@ -28,7 +28,7 @@ class Framework
           end
 
           # invoice_fields or contract_fields
-          _field_defs      = transpiler.field_defs(entry_type)
+          _field_defs      = transpiler.ast.field_defs(entry_type)
           _total_value_def = _field_defs.find { |f| f[:field] == 'TotalValue' }
 
           total_value_field _total_value_def[:from]
@@ -38,7 +38,7 @@ class Framework
             _type    = field_def[:type]
             _options = { presence: true }.tap do |options|
               options[:exports_to] = field_def[:from]
-              transpiler.add_lookup_validation(options, field_def)
+              transpiler.add_lookup_validation(options, field_def, entry_type)
             end.compact
 
             field _name, _type, _options
@@ -57,15 +57,40 @@ class Framework
           framework_name       ast[:name]
           framework_short_name ast[:framework_short_name]
         end.tap do |klass|
-          klass.const_set('Invoices', entry_data_class(:invoice)) if field_defs(:invoice)
-          klass.const_set('Contracts', entry_data_class(:contract)) if field_defs(:contract)
+          klass.const_set('Invoices', entry_data_class(:invoice)) if ast.field_defs(:invoice)
+          klass.const_set('Contracts', entry_data_class(:contract)) if ast.field_defs(:contract)
         end
       end
 
-      def add_lookup_validation(options, field_def)
-        lookup = @ast.dig(:lookups, field_def[:field])
+      def add_lookup_validation(options, field_def, entry_type)
+        # Always use a case_insensitive_inclusion validator if
+        # there's a lookup with the same name as the field
+        lookup_values = @ast.lookup_values(field_def[:field])
+        options[:case_insensitive_inclusion] = { in: lookup_values } if lookup_values
 
-        options[:case_insensitive_inclusion] = { in: [] } if lookup
+        # Add a dependent_field_inclusion validator if there's a field
+        # whose changing value influences the inclusion list.
+        # We should review why we need both and also look at the naming
+        # +dependent_field_inclusion+ - perhaps think about +varies_by+
+        # since that would make more sense in the FDL
+        depends_on = field_def[:depends_on] || return
+
+        dependent_field_def = @ast.field_by_name(
+          entry_type, depends_on[:dependent_field]
+        )
+
+        # Our dependencies are value => lookup_name e.g. { 'Lot 1' => 'Lot1Values' } -
+        # replace the lookup_name with the real array of values here e.g.
+        # -> { 'Lot 1' => ['Value 1', 'Value 2'] }
+        acceptable_values_mapping = depends_on[:values].transform_values do |lookup_name|
+          @ast.lookup_values(lookup_name)
+        end
+        options[:dependent_field_inclusion] = {
+          parent: dependent_field_def[:from],
+          in: {
+            dependent_field_def[:from] => acceptable_values_mapping
+          }
+        }
       end
     end
   end

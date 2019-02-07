@@ -1,5 +1,5 @@
 require 'framework/definition/parser'
-require 'framework/definition/ast_simplifier'
+require 'framework/definition/ast/simplifier'
 require 'framework/definition/transpiler'
 
 require 'pp'
@@ -21,7 +21,7 @@ class Framework
           slice = parse(definition_language, logger)
 
           logger.debug(slice.pretty_inspect)
-          simplified_tree = Framework::Definition::ASTSimplifier.new.apply(slice)
+          simplified_tree = Framework::Definition::AST::Simplifier.new.apply(slice)
           Transpiler.new(simplified_tree).transpile
         end
 

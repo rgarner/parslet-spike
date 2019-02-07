@@ -32,12 +32,28 @@ describe Framework::Definition::Language do
             InvoiceFields {
               TotalValue    from 'Total Spend'
               UnitOfMeasure from 'Unit of Measure'
+              LotNumber     from 'Lot Number'
+
+              ProductGroup from 'Service Provided' depends_on LotNumber {
+                '1' -> Lot1Services,
+                '2' -> Lot2Services
+              }
             }
 
             Lookups {
               UnitOfMeasure [
                 'Day'
                 'Each'
+              ]
+
+              Lot1Services [
+                'You’ll like it'
+                'Not a lot'
+              ]
+
+              Lot2Services [
+                '2: You’ll like it'
+                '2: Not a lot'
               ]
             }
           }
@@ -57,12 +73,31 @@ describe Framework::Definition::Language do
           expect(invoices_class.validators).to include(
             an_object_having_attributes(
               class: CaseInsensitiveInclusionValidator,
-              attributes: ['UnitOfMeasure']
+              attributes: ['UnitOfMeasure'],
+              options: { in: %w[Day Each] }
+            )
+          )
+        end
+
+        it 'validates the ProductGroup according to the field "Lot Number" '\
+           'from the sheet' do
+          expect(invoices_class.validators).to include(
+            an_object_having_attributes(
+              class: DependentFieldInclusionValidator,
+              attributes: ['ProductGroup'],
+              options: {
+                parent: 'Lot Number',
+                in: {
+                  'Lot Number' => {
+                    '1' => ['You’ll like it', 'Not a lot'],
+                    '2' => ['2: You’ll like it', '2: Not a lot']
+                  }
+                }
+              }
             )
           )
         end
       end
-
     end
   end
 end

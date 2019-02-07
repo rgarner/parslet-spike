@@ -65,8 +65,8 @@ class Framework
         (str(Type::INTEGER) | str(Type::STRING) | str(Type::DECIMAL) | str(Type::DATE) | str(Type::BOOLEAN)).as(:type)
       }
       rule(:optional)   { str('optional').as(:string) }
-      rule(:depends_on) { spaced(str('depends_on')) >> pascal_case_identifier.as(:field_name) >> space? >> dict }
-      rule(:dict)       { braced((key_value >> str(',').maybe).repeat(1)) }
+      rule(:depends_on) { spaced(str('depends_on')) >> pascal_case_identifier.as(:dependent_field) >> space? >> dict.as(:values) }
+      rule(:dict)       { braced((key_value >> str(',').maybe).repeat(1).as(:dict)) }
       rule(:key_value)  { spaced(string.as(:key) >> spaced(str('->')) >> pascal_case_identifier.as(:value)) }
 
       ##
@@ -75,7 +75,7 @@ class Framework
       rule(:lookups)         { lookup.repeat(1) }
       rule(:lookup)          { spaced(pascal_case_identifier.as(:lookup_name)) >> string_array }
       rule(:string_array)    { square_bracketed(list_of_strings).as(:values) }
-      rule(:list_of_strings) { (spaced(string).as(:string_list_value) >> str(',').maybe).repeat(1) }
+      rule(:list_of_strings) { (spaced(string) >> str(',').maybe).repeat(1) }
 
       ##
       # Primitive types
