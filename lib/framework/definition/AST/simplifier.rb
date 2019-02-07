@@ -29,12 +29,19 @@ class Framework
         rule(string: simple(:s))                 { String(s) }
         rule(percentage: { float: simple(:i) })  { BigDecimal(i) }
         rule(type: simple(:t))                   { TYPES.fetch(t.to_s) }
+
+        # We shouldn't be using +subtree+. It makes things like lists of lists
+        # impossible for example, by preventing rule recursion, but it works for this use case
         rule(lookups_list: subtree(:list)) do
           list.each_with_object({}) do |lookup, result|
             result[lookup[:lookup_name]] = lookup[:values]
           end
         end
+
         rule(key: simple(:key), value: simple(:value)) { { key => value } }
+        # We shouldn't be using +subtree+ here. If we ever wanted to implement
+        # a dict with more than one level, this is a career-limiting move.
+        # It's also quick and gets us over the spike line.
         rule(dict: subtree(:dict)) do
           dict.each_with_object({}) do |kv, result|
             # Always a hash with one key/value pair
