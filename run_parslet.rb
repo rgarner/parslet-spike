@@ -9,7 +9,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 require 'parslet'
 require 'bigdecimal'
 require 'framework/definition/parser'
-require 'framework/definition/ast_simplifier'
+require 'framework/definition/ast/simplifier'
 
 # InvoiceFields specified in PascalCase.
 # Each field is a known destination with a known type, so type annotations are
@@ -84,5 +84,5 @@ end
 
 puts '*******'
 
-t = Framework::Definition::ASTSimplifier.new
+t = Framework::Definition::AST::Simplifier.new
 pp t.apply(slice)
