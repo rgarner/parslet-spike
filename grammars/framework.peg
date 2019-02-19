@@ -1,0 +1,18 @@
+grammar FrameworkDefinition
+  definition <- "Framework" __ framework_identifier __ "{" __
+    framework_block
+  __ "}"
+
+  framework_block <- metadata_list
+  metadata_list   <- (metadata_pair __?)*
+  metadata_pair   <- pascal_identifier __ string
+
+  __      <-  [\s\n]
+
+  string  <-  "'" [^']* "'" %make_string
+  value   <-  list / number
+  list    <-  "[" value ("," value)* "]" %make_list
+  number  <-  [0-9]+ %make_number
+
+  framework_identifier <- [A-Z0-9/]+
+  pascal_identifier    <- ([A-Z] [a-z0-9])+
