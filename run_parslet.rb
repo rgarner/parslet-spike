@@ -20,7 +20,6 @@ require 'framework/definition/ast/simplifier'
 doc = <<~EOF
   Framework CM/OSG/05/3565 {
     Name                 'Laundry Services - Wave 2'
-    ManagementChargeRate 1.5%
 
     ContractFields {
       TotalValue from 'Total Spend'
