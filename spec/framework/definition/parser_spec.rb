@@ -14,7 +14,7 @@ describe Framework::Definition::Parser do
       subject { parser.framework_identifier }
 
       context 'slashed framework names' do
-        it { is_expected.to parse('CM/01/23/SG') }
+        it { is_expected.to parse('CM/01/23/SG').as(string: 'CM/01/23/SG') }
       end
 
       context 'lower case' do
@@ -60,6 +60,16 @@ describe Framework::Definition::Parser do
                 ]
               }
             FDL
+          ).as(
+            lookups_list: [
+              {
+                lookup_name: { string: 'UnitOfMeasure' },
+                values: [
+                  {string: 'Day'},
+                  {string: 'Each'}
+                ]
+              }
+            ]
           )
         }
       end
